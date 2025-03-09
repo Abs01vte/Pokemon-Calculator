@@ -10,7 +10,7 @@ file3 = open("res/type_efficacy.csv", "r")
 # Defining Window variables
 window = tk.Tk()
 window.title("PKMN Type Matchup Calculator")
-window.geometry("720x640")
+window.geometry("1920x1080")
 
 # Defining pokemon name entry boxes
 entry1_var = tk.StringVar()
@@ -50,9 +50,10 @@ def getPokemon(name):
         curr_slice = curr_line.split(",")
         if(curr_slice[0] == str(name).lower()):
             dexNum = curr_slice[1]
+            return dexNum
         x+=1
         if(x == len(pokeList)):
-            return 0
+            dexNum = 0
      return dexNum
 
 # Find a Pokemon's type
@@ -91,43 +92,6 @@ def getType(dex):
             return 0
     return typeNum   
 
-# Takes in the Pokedex entry number and outputs the type data ascribed to it
-def generateTypeChart(dexNum, chartType):
-    if(chartType == "a"):
-        pType = getType(dexNum)
-        if(len(pType < 2)):
-            typeChart=[]
-            x=0
-            index1=getIndexType(pType[0])
-            index2=getIndexType(pType[1])
-            while(x<17):
-                curr_split = typeAdv[x+index].split(",") 
-                typeChart.append(f"%d,%d"%curr_split[1],curr_split[2])
-        else:
-            #does other things
-            typeChart=[]
-            x=0
-            y=0
-
-            advList = []
-            while x < len(typeAdv):
-                curr_split = typeAdv[x].split(",")
-                if(curr_split[1]==pType[0] or curr_split[1] == pType[1]):
-                    if(isAdvantageous(curr_split[0],curr_split[1])):
-                        typeChart.append(f"%d,%d"%curr_split[0],"150"
-                    if(isDisavantageous(curr_split[0], curr_split[1]):
-                        typeChart.append(f"%d,%d"%curr_split[0],curr_split[2]
-                    else:
-                        typeChart.append(f"%d,%d"%curr_split[0],"0")
-                y+=1
-                x+=19
-                if(y==18): y=0
-    else:
-        pType = getType(dexNum)
-
-    print(typeChart)
-    return typeChart
-
 
 def getIndexType(typeNum):
     x=0 
@@ -140,7 +104,7 @@ def isAdvantageous(attack, defense):
     while x < len(typeAdv)-1:
         curr_split = typeAdv[x].split(",")
         if(curr_split[0] == attack and curr_split[1] == defense):
-            if(curr_split[2] > 100):
+            if(curr_split[2] > "100"):
                 return True
     return False
 def isDisadvantageous(attack, defense):
@@ -148,7 +112,7 @@ def isDisadvantageous(attack, defense):
     while x < len(typeAdv)-1:
         curr_split = typeAdv[x].split(",")
         if(curr_split[0] == attack and curr_split[1] == defense):
-            if(curr_split[2] == 50):
+            if(curr_split[2] == "50"):
                 return True
     return False
 def isIneffective(attack, defense):
@@ -156,9 +120,53 @@ def isIneffective(attack, defense):
     while x < len(typeAdv)-1:
         curr_split = typeAdv[x].split(",")
         if(curr_split[0] == attack and curr_split[1] == defense):
-            if(curr_split[2] == 0):
+            if(curr_split[2] == "0"):
                 return True
     return False
+
+# Takes in the Pokedex entry number and outputs the type data ascribed to it
+def generateTypeChart(dexNum, chartType):
+    if(chartType == "a"):
+        pType = getType(dexNum)
+        type1 = str(pType[0])
+        type2 = str(pType[1])
+        if(len(pType) < 2):
+            typeChart=[]
+            x=0
+            index1=getIndexType(type1)
+            index2=getIndexType(type2)
+            while(x<17):
+                curr_split = typeAdv[x+index1].split(",") 
+                typeChart.append(f"%d,%d"%curr_split[1],curr_split[2])
+                x+=1
+        else:
+            #does other things
+            typeChart=[]
+            x=0
+            y=0
+
+            advList = []
+            while x < len(typeAdv):
+                curr_split = typeAdv[x].split(",")
+                if(curr_split[1]==pType[0] or curr_split[1] == pType[1]):
+                    if(isAdvantageous(curr_split[0],curr_split[1])):
+                        typeChart.append(f"%d,%d"%curr_split[0],"150")
+                    if(isDisadvantageous(curr_split[0], curr_split[1])):
+                        typeChart.append(f"%d,%d"%curr_split[0],curr_split[2])
+                    else:
+                        typeChart.append(f"%d,%d"%curr_split[0],"0")
+
+                y+=1
+                x+=19
+                if(y==18): y=0
+    else:
+        pType = getType(dexNum)
+        #things and stuff
+
+    print(typeChart)
+    return typeChart
+
+
 
 # On-click "submit" function that runs the engine with the input
 def submit():
@@ -170,31 +178,31 @@ def submit():
     entry4=entry4_var.get()
     entry5=entry5_var.get()
     entry6=entry6_var.get()
-
+    
     # Check the Database for matching names, on error return "DNF"
     pkmn1 = [getPokemon(entry1)]
-    if(pkmn1 == 0):
-        text.insert("1.0", f"Houston, we have a problem.\nCould not find: %s" % entry1)
+    if(pkmn1[0] == 0):
+        text.insert("1.0", f"Could not find: %s.\n" % entry1)
         error = 1
     pkmn2 = [getPokemon(entry2)]
-    if(pkmn2 == 0):
-        text.insert("1.0", f"Houston, we have a problem.\nCould not find: %s" % entry2)
+    if(pkmn2[0] == 0):
+        text.insert("1.0", f"Could not find: %s.\n" % entry2)
         error = 1
     pkmn3 = [getPokemon(entry3)]
-    if(pkmn3 == 0):
-        text.insert("1.0", f"Houston, we have a problem.\nCould not find: %s" % entry3)
+    if(pkmn3[0] == 0):
+        text.insert("1.0", f"Could not find: %s.\n" % entry3)
         error = 1
     pkmn4 = [getPokemon(entry4)]
-    if(pkmn4 == 0):
-        text.insert("1.0", f"Houston, we have a problem.\nCould not find: %s" % entry4)
+    if(pkmn4[0] == 0):
+        text.insert("1.0", f"Could not find: %s.\n" % entry4)
         error = 1
     pkmn5 = [getPokemon(entry5)]
-    if(pkmn5 == 0):
-        text.insert("1.0", f"Houston, we have a problem.\nCould not find: %s" % entry5)
+    if(pkmn5[0] == 0):
+        text.insert("1.0", f"Could not find: %s.\n" % entry5)
         error = 1
     pkmn6 = [getPokemon(entry6)]
-    if(pkmn6 == 0):
-        text.insert("1.0", f"Houston, we have a problem.\nCould not find: %s" % entry6)
+    if(pkmn6[0] == 0):
+        text.insert("1.0", f"Could not find: %s.\n" % entry6)
         error = 1
     
     # if a previous error has occurred, the program stops and awaits new input
@@ -205,52 +213,75 @@ def submit():
     # Assign types to the Pokemon
     pkmnType = getType(str(pkmn1[0]))
     if(pkmnType == []):
-        text.insert("1.0", f"Type for %s does not exist." % str(entry1))
+        print("1.0", f"Type for %s does not exist.\n" % str(entry1))
         error=1
-    pkmn1.append(pkmnType)
+    else:
+        pkmn1.append(pkmnType[0])
+        if(len(pkmnType) == 2):
+            pkmn1.append(pkmnType[1])
+
     pkmnType = getType(str(pkmn2[0]))
     if(pkmnType == []):
-        text.insert("1.0", f"Type for %s does not exist." % str(entry2))
+        text.insert("1.0", f"Type for %s does not exist.\n" % str(entry2))
         error=1
-    pkmn2.append(pkmnType)
+    else:
+        pkmn2.append(pkmnType[0])
+        if(len(pkmnType) == 2):
+            pkmn2.append(pkmnType[1])
     pkmnType = getType(str(pkmn3[0]))
     if(pkmnType == []):
-        text.insert("1.0", f"Type for %s does not exist." % str(entry3))
+        text.insert("1.0", f"Type for %s does not exist.\n" % str(entry3))
         error=1
-    pkmn3.append(pkmnType)
+    else:
+        pkmn3.append(pkmnType[0])
+        if(len(pkmnType) == 2):
+            pkmn3.append(pkmnType[1])
     pkmnType = getType(str(pkmn4[0]))
     if(pkmnType == []):
-        text.insert("1.0", f"Type for %s does not exist." % str(entry4))
+        text.insert("1.0", f"Type for %s does not exist.\n" % str(entry4))
         error=1
-    pkmn4.append(pkmnType)
+    else:
+        pkmn4.append(pkmnType[0])
+        if(len(pkmnType) == 2):
+            pkmn4.append(pkmnType[1])
     pkmnType = getType(str(pkmn5[0]))
     if(pkmnType == []):
-        text.insert("1.0", f"Type for %s does not exist." % str(entry5))
+        text.insert("1.0", f"Type for %s does not exist.\n" % str(entry5))
         error=1
-    pkmn5.append(pkmnType)
+    else:
+        pkmn5.append(pkmnType[0])
+        if(len(pkmnType) == 2):
+            pkmn5.append(pkmnType[1])
     pkmnType = getType(str(pkmn6[0]))
     if(pkmnType == []):
-        text.insert("1.0", f"Type for %s does not exist." % str(entry6))
+        text.insert("1.0", f"Type for %s does not exist.\n" % str(entry6))
         error=1
-    pkmn6.append(pkmnType)
+    else:
+        pkmn6.append(pkmnType[0])
+        if(len(pkmnType) == 2):
+            pkmn6.append(pkmnType[1])
+    print(str(pkmn1) + " " + str(pkmn2) + " " + str(pkmn3) + " " + str(pkmn4) + " " + str(pkmn5) + " " + str(pkmn6))
     #if a previous error has occurred, the program stops and awaits new input
     if(error == 1):
         return None
-    
-    # "get individual type charts" function calls
-    pkmn1_attack_profile = generateTypeChart(pkmn1[1], a)
-    pkmn2_attack_profile = generateTypeChart(pkmn2[1], a)
-    pkmn3_attack_profile = generateTypeChart(pkmn3[1], a)
-    pkmn4_attack_profile = generateTypeChart(pkmn4[1], a)   
-    pkmn5_attack_profile = generateTypeChart(pkmn5[1], a)
-    pkmn6_attack_profile = generateTypeChart(pkmn6[1], a)
 
-    pkmn1_defense_profile = generateTypeChart(pkmn1[1], d)
+    # "get individual type charts" function calls
+    pkmn1_attack_profile = generateTypeChart(pkmn1[1], "a")
+    text.insert("1.0", str(pkmn1_attack_profile))
+    pkmn2_attack_profile = generateTypeChart(pkmn2[1], "a")
+    pkmn3_attack_profile = generateTypeChart(pkmn3[1], "a")
+    pkmn4_attack_profile = generateTypeChart(pkmn4[1], "a")   
+    pkmn5_attack_profile = generateTypeChart(pkmn5[1], "a")
+    pkmn6_attack_profile = generateTypeChart(pkmn6[1], "a")
+    print("We are here! We are here!")
+    #pkmn1_defense_profile = generateTypeChart(pkmn1[1], "d")
     #TODO Insert the "Compare team type coverages" function calls
 
     #TODO Insert the findings into a text box like below
     #text.insert("1.0", "We got: " + str(entry1) + ", " + str(entry2) + ", " + str(entry3) + ", " + str(entry4) + ", " + str(entry5) + ", " + str(entry6))
     # call functions here...
+    text.insert("1.0", "Since you are curious, I did, in fact, work. You are just impatient.")
+    return None
 
 
 
