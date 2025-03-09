@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "pyrite": "^3.5.0"
+  }
+}

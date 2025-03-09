@@ -79,7 +79,7 @@ def getPokemon(name):
 18 = Fairy
 0 = Not Found
 """
-def getType(dex):
+def getType(dex)->list[str]:
     x=0
     typeNum = []
     while x < len(typeList)-1:
@@ -89,72 +89,81 @@ def getType(dex):
             typeNum.append(curr_slice[1])
         x+=1
         if(x == len(typeList)):
-            return 0
+            return ["NULL"]
     return typeNum   
 
 
-def getIndexType(typeNum):
+def getIndexType(typeNum)->int:
     x=0 
     while x < len(typeAdv)-1:
         curr_split = typeAdv[x].split(",")
         if(typeNum == curr_split[0]):
             return x
-def isAdvantageous(attack, defense):
+        x+=1
+    return 0
+def isAdvantageous(attack, defense)->bool:
     x=0
     while x < len(typeAdv)-1:
         curr_split = typeAdv[x].split(",")
         if(curr_split[0] == attack and curr_split[1] == defense):
             if(curr_split[2] > "100"):
                 return True
+        x+=1
     return False
-def isDisadvantageous(attack, defense):
+def isDisadvantageous(attack, defense)->bool:
     x=0
     while x < len(typeAdv)-1:
         curr_split = typeAdv[x].split(",")
         if(curr_split[0] == attack and curr_split[1] == defense):
             if(curr_split[2] == "50"):
                 return True
+        x+=1
     return False
-def isIneffective(attack, defense):
+def isIneffective(attack, defense)->bool:
     x=0
     while x < len(typeAdv)-1:
         curr_split = typeAdv[x].split(",")
         if(curr_split[0] == attack and curr_split[1] == defense):
             if(curr_split[2] == "0"):
                 return True
+        x+=1
     return False
 
 # Takes in the Pokedex entry number and outputs the type data ascribed to it
-def generateTypeChart(dexNum, chartType):
+def generateTypeChart(dexNum, chartType)->list[str]:
+    typeChart=[]
     if(chartType == "a"):
         pType = getType(dexNum)
         type1 = str(pType[0])
-        type2 = str(pType[1])
+
         if(len(pType) < 2):
-            typeChart=[]
+            
             x=0
             index1=getIndexType(type1)
-            index2=getIndexType(type2)
+            print(str(index1) + " index for the pokemon: " + str(dexNum))
             while(x<17):
                 curr_split = typeAdv[x+index1].split(",") 
-                typeChart.append(f"%d,%d"%curr_split[1],curr_split[2])
+                if(curr_split[0] == type1):
+                    typeChart.append((f"%d,%d"%curr_split[1],curr_split[2]))
                 x+=1
         else:
             #does other things
+            type2 = str(pType[1])
             typeChart=[]
             x=0
             y=0
-
+            index1=getIndexType(type1)
+            index2=getIndexType(type2)
             advList = []
             while x < len(typeAdv):
                 curr_split = typeAdv[x].split(",")
                 if(curr_split[1]==pType[0] or curr_split[1] == pType[1]):
                     if(isAdvantageous(curr_split[0],curr_split[1])):
-                        typeChart.append(f"%d,%d"%curr_split[0],"150")
+                        typeChart.append(f"%s,150"%curr_split[0])
                     if(isDisadvantageous(curr_split[0], curr_split[1])):
-                        typeChart.append(f"%d,%d"%curr_split[0],curr_split[2])
+                        typeChart.append((f"%s,%s"%curr_split[0],curr_split[2]))
                     else:
-                        typeChart.append(f"%d,%d"%curr_split[0],"0")
+                        typeChart.append(f"%s,0"%curr_split[0])
 
                 y+=1
                 x+=19
@@ -181,27 +190,27 @@ def submit():
     
     # Check the Database for matching names, on error return "DNF"
     pkmn1 = [getPokemon(entry1)]
-    if(pkmn1[0] == 0):
+    if(pkmn1[0] == "NULL"):
         text.insert("1.0", f"Could not find: %s.\n" % entry1)
         error = 1
     pkmn2 = [getPokemon(entry2)]
-    if(pkmn2[0] == 0):
+    if(pkmn2[0] == "NULL"):
         text.insert("1.0", f"Could not find: %s.\n" % entry2)
         error = 1
     pkmn3 = [getPokemon(entry3)]
-    if(pkmn3[0] == 0):
+    if(pkmn3[0] == "NULL"):
         text.insert("1.0", f"Could not find: %s.\n" % entry3)
         error = 1
     pkmn4 = [getPokemon(entry4)]
-    if(pkmn4[0] == 0):
+    if(pkmn4[0] == "NULL"):
         text.insert("1.0", f"Could not find: %s.\n" % entry4)
         error = 1
     pkmn5 = [getPokemon(entry5)]
-    if(pkmn5[0] == 0):
+    if(pkmn5[0] == "NULL"):
         text.insert("1.0", f"Could not find: %s.\n" % entry5)
         error = 1
     pkmn6 = [getPokemon(entry6)]
-    if(pkmn6[0] == 0):
+    if(pkmn6[0] == "NULL"):
         text.insert("1.0", f"Could not find: %s.\n" % entry6)
         error = 1
     
@@ -260,7 +269,6 @@ def submit():
         pkmn6.append(pkmnType[0])
         if(len(pkmnType) == 2):
             pkmn6.append(pkmnType[1])
-    print(str(pkmn1) + " " + str(pkmn2) + " " + str(pkmn3) + " " + str(pkmn4) + " " + str(pkmn5) + " " + str(pkmn6))
     #if a previous error has occurred, the program stops and awaits new input
     if(error == 1):
         return None
@@ -290,17 +298,17 @@ label.pack()
 button = tk.Button(window, text="Quit", command = window.destroy)
 button.pack()
 
-entry1 = tk.Entry(window, text="Insert info here...", textvariable = entry1_var)
+entry1 = tk.Entry(window, textvariable = entry1_var)
 entry1.pack()
-entry2 = tk.Entry(window, text="Insert info here...", textvariable = entry2_var)
+entry2 = tk.Entry(window, textvariable = entry2_var)
 entry2.pack()
-entry3 = tk.Entry(window, text="Insert info here...", textvariable = entry3_var)
+entry3 = tk.Entry(window, textvariable = entry3_var)
 entry3.pack()
-entry4 = tk.Entry(window, text="Insert info here...", textvariable = entry4_var)
+entry4 = tk.Entry(window, textvariable = entry4_var)
 entry4.pack()
-entry5 = tk.Entry(window, text="Insert info here...", textvariable = entry5_var)
+entry5 = tk.Entry(window, textvariable = entry5_var)
 entry5.pack()
-entry6 = tk.Entry(window, text="Insert info here...", textvariable = entry6_var)
+entry6 = tk.Entry(window, textvariable = entry6_var)
 entry6.pack()
 
 entryButton = tk.Button(window, text="Enter", command = submit)
