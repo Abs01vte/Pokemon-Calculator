@@ -133,41 +133,92 @@ def isIneffective(attack, defense)->bool:
 def generateTypeChart(dexNum, chartType)->list[str]:
     typeChart=[]
     if(chartType == "a"):
+
         pType = getType(dexNum)
         type1 = str(pType[0])
+        # Some pokemon have one type
         if(len(pType) < 2):
             for type in typeAdv:
                 curr_split = type.split(",") 
 
                 if(curr_split[0] == type1):
-                    typeChart.append((f"%s,"%curr_split[1]+f"%s"%curr_split[2]))
+                    if(curr_split[2]!="100"):
+                        typeChart.append((f"%s,"%curr_split[1]+f"%s"%curr_split[2]))
+                        
+                    else:
+                        pass
+        # Or they have two
         else:
             #does other things
-            type2 = str(pType[1])
-            typeChart=[]
-            x=0
-            y=0
-            index1=getIndexType(type1)
-            index2=getIndexType(type2)
-            advList = []
-            while x < len(typeAdv):
-                curr_split = typeAdv[x].split(",")
-                if(curr_split[1]==pType[0] or curr_split[1] == pType[1]):
-                    if(isAdvantageous(curr_split[0],curr_split[1])):
-                        typeChart.append(f"%s,150"%curr_split[0])
-                    if(isDisadvantageous(curr_split[0], curr_split[1])):
-                        typeChart.append((f"%s,50"%curr_split[0]))
+            for val in typeAdv:
+                curr_split = val.split(",")
+                if(curr_split[0] == pType[0] or curr_split[0] == pType[1]):
+                    if(curr_split[2] != "100"):
+                        typeChart.append(f"%s,"%curr_split[1] + f"%s"%curr_split[2])
                     else:
-                        typeChart.append(f"%s,0"%curr_split[0])
-
-                y+=1
-                x+=19
-                if(y==18): y=0
-    else:
+                        pass
+    # Or it is a defensive chart
+    elif(chartType == "d"):
         pType = getType(dexNum)
         #things and stuff
-
+        
+        # check for one or two type
+        if(len(pType) < 2):
+            for val in typeAdv:
+                curr_split = val.split(",")
+                if(curr_split[1] == pType[0]):
+                    if(curr_split[2] != "100"):
+                        typeChart.append(f"%s,"%curr_split[0] + f"%s"%curr_split[2])
+                    else:
+                        typeChart.append(f"%s,"%curr_split[0]+f"%s"%curr_split[2])
+        # it is a two type
+        else:
+            for val in typeAdv:
+                curr_split = val.split(",")
+                if(curr_split[1] == str(pType[0]) or curr_split[1] == str(pType[1])):
+                    if(curr_split[2] != "100"):
+                        typeChart.append(f"%s,"%curr_split[0] + f"%s"%curr_split[2])
+                    else:
+                        pass
     return typeChart
+def compareCharts(attackChart, defenseChart)->list[str]:
+
+    # Generate a chart that displays advantage positively and disadvantage negatively, but normal is 0
+    attackStrengths = []
+    x=18
+    while x > 0:
+        attackStrengths.append(0)
+        x-=1
+    # Generate a chart that displays advantage (for attacker) negatively, and disadvantage positively, but normal is 0
+    defenseStrengths = []
+    x=18
+    while x > 0:
+        defenseStrengths.append(0)
+        x-=1
+    # Populate the attacking chart with the information gained from the matrix of team type advantages and disadvantages
+    for val in attackChart:
+        for sub in val:
+            curr_split=sub.split(",")
+            if(curr_split[1] == "200"):
+                attackStrengths[int(curr_split[0])-1] = attackStrengths[int(curr_split[0])-1] + 1
+            else:
+                pass        
+    # Populate the defending chart with the information gained from the matrix of team type advantages and disadvantages
+    for val in defenseChart:
+        for sub in val:
+            curr_split=sub.split(",")
+            if(curr_split[1] == "200"):
+                defenseStrengths[int(curr_split[0])-1] = defenseStrengths[int(curr_split[0])-1] - 1
+            elif(curr_split[1] == "50" or curr_split[1] == "0"):
+                defenseStrengths[int(curr_split[0])-1] = defenseStrengths[int(curr_split[0])-1] + 1
+    # Combine the two sets of data into a comma separated value list
+    x=0
+    chartComparison = []
+    while x < 18:
+        chartComparison.append(f"%s,"%attackStrengths[x] + f"%s"%defenseStrengths[x])
+        x+=1
+    return chartComparison
+    
 def returnType(typeNum)->str:
     match typeNum:
         case "1": 
@@ -241,7 +292,12 @@ def returnEffectiveness(attackVal)->str:
         case "0":
             return "No "
     return "DNF"
-
+def returnPokemon(dexNum)->str:
+    for val in pokeList:
+        curr_split = val.split(",")
+        if(int(curr_split[1]) == dexNum):
+            return curr_split[0]
+    return None
 # On-click "submit" function that runs the engine with the input
 def submit():
     error = 0
@@ -255,27 +311,27 @@ def submit():
     
     # Check the Database for matching names, on error return "DNF"
     pkmn1 = [getPokemon(entry1)]
-    if(pkmn1[0] == "NULL"):
+    if(pkmn1[0] == 0):
         text.insert("1.0", f"Could not find: %s.\n" % entry1)
         error = 1
     pkmn2 = [getPokemon(entry2)]
-    if(pkmn2[0] == "NULL"):
+    if(pkmn2[0] == 0):
         text.insert("1.0", f"Could not find: %s.\n" % entry2)
         error = 1
     pkmn3 = [getPokemon(entry3)]
-    if(pkmn3[0] == "NULL"):
+    if(pkmn3[0] == 0):
         text.insert("1.0", f"Could not find: %s.\n" % entry3)
         error = 1
     pkmn4 = [getPokemon(entry4)]
-    if(pkmn4[0] == "NULL"):
+    if(pkmn4[0] == 0):
         text.insert("1.0", f"Could not find: %s.\n" % entry4)
         error = 1
     pkmn5 = [getPokemon(entry5)]
-    if(pkmn5[0] == "NULL"):
+    if(pkmn5[0] == 0):
         text.insert("1.0", f"Could not find: %s.\n" % entry5)
         error = 1
     pkmn6 = [getPokemon(entry6)]
-    if(pkmn6[0] == "NULL"):
+    if(pkmn6[0] == 0):
         text.insert("1.0", f"Could not find: %s.\n" % entry6)
         error = 1
     
@@ -287,7 +343,7 @@ def submit():
     # Assign types to the Pokemon
     pkmnType = getType(str(pkmn1[0]))
     if(pkmnType == []):
-        print("1.0", f"Type for %s does not exist.\n" % str(entry1))
+        text.insert("1.0", f"Type for %s does not exist.\n" % str(entry1))
         error=1
     else:
         pkmn1.append(pkmnType[0])
@@ -338,65 +394,127 @@ def submit():
     if(error == 1):
         return None
 
-    # "get individual type charts" function calls
-    text.insert("2.0", "Attack Charts for your team: \n")
+    # Generate Attack Efficacy charts
     pkmn1_attack_profile = generateTypeChart(pkmn1[0], "a")
-    output = ""
-    if(len(pkmn1) > 2):
-        output +=(f"For pokemon %s "%entry1 + "of type(s)" + returnType(pkmn1[1][0]) + " and " + returnType(pkmn1[1][1]) + ":\n")
-    else:
-        output +=(f"For pokemon %s "%entry1 + "of type(s)" + returnType(pkmn1[1]) + ":\n")
-    for val in pkmn1_attack_profile:
-        curr_split = val.split(",")
-        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
     pkmn2_attack_profile = generateTypeChart(pkmn2[0], "a")
-    if(len(pkmn2) > 2):
-        output +=(f"For pokemon %s "%entry2 + "of type(s)" + returnType(pkmn2[1][0]) + " and " + returnType(pkmn2[1][1]) + ":\n")
-    else:
-        output +=(f"For pokemon %s "%entry2 + "of type(s)" + returnType(pkmn2[1]) + ":\n")
-    for val in pkmn2_attack_profile:
-        curr_split = val.split(",")
-        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
     pkmn3_attack_profile = generateTypeChart(pkmn3[0], "a")
-    if(len(pkmn3) > 2):
-        output +=(f"For pokemon %s "%entry3 + "of type(s)" + returnType(pkmn3[1][0]) + " and " + returnType(pkmn3[1][1]) + ":\n")
-    else:
-        output +=(f"For pokemon %s "%entry3 + "of type(s)" + returnType(pkmn3[1]) + ":\n")
-    for val in pkmn3_attack_profile:
-        curr_split = val.split(",")
-        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
     pkmn4_attack_profile = generateTypeChart(pkmn4[0], "a")
-    if(len(pkmn4) > 2):
-        output +=(f"For pokemon %s "%entry4 + "of type(s)" + returnType(pkmn4[1][0]) + " and " + returnType(pkmn4[1][1]) + ":\n")
-    else:
-        output +=(f"For pokemon %s "%entry4 + "of type(s)" + returnType(pkmn4[1]) + ":\n")
-    for val in pkmn4_attack_profile:
-        curr_split = val.split(",")
-        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
     pkmn5_attack_profile = generateTypeChart(pkmn5[0], "a")
-    if(len(pkmn5) > 2):
-        output +=(f"For pokemon %s "%entry5 + "of type(s)" + returnType(pkmn5[1][0]) + " and " + returnType(pkmn5[1][1]) + ":\n")
-    else:
-        output +=(f"For pokemon %s "%entry5 + "of type(s)" + returnType(pkmn5[1]) + ":\n")
-    for val in pkmn5_attack_profile:
-        curr_split = val.split(",")
-        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
     pkmn6_attack_profile = generateTypeChart(pkmn6[0], "a")
-    if(len(pkmn6) > 2):
-        output +=(f"For pokemon %s "%entry6 + "of type(s)" + returnType(pkmn6[1][0]) + " and " + returnType(pkmn6[1][1]) + ":\n")
-    else:
-        output +=(f"For pokemon %s "%entry6 + "of type(s)" + returnType(pkmn6[1]) + ":\n")
-    for val in pkmn6_attack_profile:
-        curr_split = val.split(",")
-        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
-    text.insert("3.0", output)
-    #pkmn1_defense_profile = generateTypeChart(pkmn1[1], "d")
-    #TODO Insert the "Compare team type coverages" function calls
+    if(pkmn1_attack_profile == [] or pkmn2_attack_profile == [] or pkmn3_attack_profile == [] or pkmn4_attack_profile == [] or pkmn5_attack_profile == [] or pkmn6_attack_profile == []):
+        text.insert("1.0", "Something went wrong... attack")
+        return None
+    # Generate Defense Efficacy charts
+    pkmn1_defense_profile = generateTypeChart(pkmn1[0], "d")
+    if(pkmn1_defense_profile == []):
+        text.insert("1.0", f"Something went wrong... defense chart for %s"%returnPokemon(pkmn1[0]))
+        return None
+    pkmn2_defense_profile = generateTypeChart(pkmn2[0], "d")
+    if(pkmn2_defense_profile == []):
+        text.insert("1.0", f"Something went wrong... defense chart for %s"%returnPokemon(pkmn2[0]))
+        return None
+    pkmn3_defense_profile = generateTypeChart(pkmn3[0], "d")
+    if(pkmn3_defense_profile == []):
+        text.insert("1.0", f"Something went wrong... defense chart for %s"%returnPokemon(pkmn3[0]))
+        return None
+    pkmn4_defense_profile = generateTypeChart(pkmn4[0], "d")
+    if(pkmn4_defense_profile == []):
+        text.insert("1.0", f"Something went wrong... defense chart for %s"%returnPokemon(pkmn4[0]))
+        return None
+    pkmn5_defense_profile = generateTypeChart(pkmn5[0], "d")
+    if(pkmn5_defense_profile == []):
+        text.insert("1.0", f"Something went wrong... defense chart for %s"%returnPokemon(pkmn5[0]))
+        return None
+    pkmn6_defense_profile = generateTypeChart(pkmn6[0], "d")    
+    if(pkmn6_defense_profile == []):
+        text.insert("1.0", f"Something went wrong... defense chart for %s"%returnPokemon(pkmn6[0]))
+        return None
+    # Compare team advantages and weaknesses
+    team_attack_profile = []
+    team_attack_profile.append(pkmn1_attack_profile)
+    team_attack_profile.append(pkmn2_attack_profile)
+    team_attack_profile.append(pkmn3_attack_profile)
+    team_attack_profile.append(pkmn4_attack_profile)
+    team_attack_profile.append(pkmn5_attack_profile)
+    team_attack_profile.append(pkmn6_attack_profile)
+    team_defense_profile = []
+    team_defense_profile.append(pkmn1_defense_profile)
+    team_defense_profile.append(pkmn2_defense_profile)
+    team_defense_profile.append(pkmn3_defense_profile)
+    team_defense_profile.append(pkmn4_defense_profile)
+    team_defense_profile.append(pkmn5_defense_profile)
+    team_defense_profile.append(pkmn6_defense_profile)
 
-    #TODO Insert the findings into a text box like below
-    #text.insert("1.0", "We got: " + str(entry1) + ", " + str(entry2) + ", " + str(entry3) + ", " + str(entry4) + ", " + str(entry5) + ", " + str(entry6))
+    team_profile = compareCharts(team_attack_profile, team_defense_profile)
+
+    # Find the worst performing defense against a certain type
+
+    hardestType = 0
+    lowestDefense = 1
+    x = 0
+    while x < 18:
+        curr_split = team_profile[x].split(",")
+        if(int(curr_split[1]) < lowestDefense):
+            lowestDefense = int(curr_split[1])
+            hardestType = x+1
+        x+=1
+    # Find the best performing attack against a certain type
+    x=0
+    bestType = 0
+    highestAttack = -1
+    while x < 18:
+        curr_split = team_profile[x].split(",")
+        if(int(curr_split[0]) > highestAttack):
+            highestAttack = int(curr_split[0])
+            bestType = x+1
+        x+=1
+    bestTypes = []
+    worstTypes = []
+    x=0
+    while x < len(team_profile):
+        curr_split = team_profile[x].split(",")
+        if(int(curr_split[0]) > 0):
+            bestTypes.append(str(x+1) + f",%s"%curr_split[0])
+        elif(int(curr_split[1]) < 0):
+            worstTypes.append(str(x+1) + f",%s"%curr_split[1])
+        x+=1
+    
+
+    #Insert the findings into a text box
+    text.insert("1.0", "Your team analysis is below: \n")
+    if(len(bestTypes) <= 1): 
+        text.insert("end", f"Your team's attacks have an advantage against %s type Pokemon.\n"%returnType(str(bestType[0])))
+    else:
+        typeNames = []
+        for num in bestTypes:
+            curr_split = num.split(",")
+            typeNames.append(returnType(curr_split[0]))
+        typeDeclaration = ""
+        x = 0
+
+        while(x<len(typeNames)):
+            curr_split = typeNames[x].split(",")
+            typeDeclaration += (curr_split[0] +  f" at %s occurances\n"%bestTypes[x].split(",")[1])
+            x+=1
+        text.insert("end", "Your Pokemon have advantages against the types: \n" + typeDeclaration)
+    if(len(worstTypes) <= 1): 
+        text.insert("end", f"Your team's defenses have a disadvantage against %s type Pokemon.\n"%returnType(str(hardestType)))
+    else:
+        typeNames = []
+        for num in worstTypes:
+            curr_split = num.split(",")
+            typeNames.append(returnType(curr_split[0]))
+        typeDeclaration = ""
+        x = 0
+        while(x<len(typeNames)):
+            curr_split = typeNames[x].split(",")
+            typeDeclaration = (curr_split[0] +  f" at %d occurances\n"%(int(worstTypes[x].split(",")[1]) * -1))
+            x+=1
+        text.insert("end","Your Pokemon have disadvantages against the types: " + typeDeclaration)
+
+
+
     # call functions here...
-    text.insert("1.0", "Your Results are as follows: \n")
     return None
 
 
