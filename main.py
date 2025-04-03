@@ -135,17 +135,12 @@ def generateTypeChart(dexNum, chartType)->list[str]:
     if(chartType == "a"):
         pType = getType(dexNum)
         type1 = str(pType[0])
-
         if(len(pType) < 2):
-            
-            x=0
-            index1=getIndexType(type1)
-            print(str(index1) + " index for the pokemon: " + str(dexNum))
-            while(x<17):
-                curr_split = typeAdv[x+index1].split(",") 
+            for type in typeAdv:
+                curr_split = type.split(",") 
+
                 if(curr_split[0] == type1):
-                    typeChart.append((f"%d,%d"%curr_split[1],curr_split[2]))
-                x+=1
+                    typeChart.append((f"%s,"%curr_split[1]+f"%s"%curr_split[2]))
         else:
             #does other things
             type2 = str(pType[1])
@@ -161,7 +156,7 @@ def generateTypeChart(dexNum, chartType)->list[str]:
                     if(isAdvantageous(curr_split[0],curr_split[1])):
                         typeChart.append(f"%s,150"%curr_split[0])
                     if(isDisadvantageous(curr_split[0], curr_split[1])):
-                        typeChart.append((f"%s,%s"%curr_split[0],curr_split[2]))
+                        typeChart.append((f"%s,50"%curr_split[0]))
                     else:
                         typeChart.append(f"%s,0"%curr_split[0])
 
@@ -172,10 +167,80 @@ def generateTypeChart(dexNum, chartType)->list[str]:
         pType = getType(dexNum)
         #things and stuff
 
-    print(typeChart)
     return typeChart
-
-
+def returnType(typeNum)->str:
+    match typeNum:
+        case "1": 
+            return "Normal"
+        case "2":
+            return "Fighting"
+        case "3":
+            return "Flying"
+        case "4":
+            return "Poison"
+        case "5":
+            return "Ground"
+        case "6":
+            return "Rock"
+        case "7":
+            return "Bug"
+        case "8":
+            return "Ghost"
+        case "9":
+            return "Steel"
+        case "10":
+            return "Fire"
+        case "11":
+            return "Water"
+        case "12":
+            return "Grass"
+        case "13":
+            return "Electric"
+        case "14":
+            return "Psychic"
+        case "15":
+            return "Ice"
+        case "16":
+            return "Dragon"
+        case "17":
+            return "Dark"
+        case "18": 
+            return "Fairy"
+    return "DNF"
+"""
+1 = Normal type
+2 = Fighting
+3 = Flying
+4 = Poison
+5 = Ground
+6 = Rock
+7 = Bug
+8 = Ghost
+9 = Steel
+10 = Fire
+11 = Water
+12 = Grass
+13 = Electric
+14 = Psychic
+15 = Ice
+16 = Dragon
+17 = Dark
+18 = Fairy
+0 = Not Found
+"""
+def returnEffectiveness(attackVal)->str:
+    match attackVal:
+        case "200":
+            return "Super "
+        case "150":
+            return "Advantageous "
+        case "100":
+            return "Normal "
+        case "50":
+            return "Reduced "
+        case "0":
+            return "No "
+    return "DNF"
 
 # On-click "submit" function that runs the engine with the input
 def submit():
@@ -274,21 +339,64 @@ def submit():
         return None
 
     # "get individual type charts" function calls
-    pkmn1_attack_profile = generateTypeChart(pkmn1[1], "a")
-    text.insert("1.0", str(pkmn1_attack_profile))
-    pkmn2_attack_profile = generateTypeChart(pkmn2[1], "a")
-    pkmn3_attack_profile = generateTypeChart(pkmn3[1], "a")
-    pkmn4_attack_profile = generateTypeChart(pkmn4[1], "a")   
-    pkmn5_attack_profile = generateTypeChart(pkmn5[1], "a")
-    pkmn6_attack_profile = generateTypeChart(pkmn6[1], "a")
-    print("We are here! We are here!")
+    text.insert("2.0", "Attack Charts for your team: \n")
+    pkmn1_attack_profile = generateTypeChart(pkmn1[0], "a")
+    output = ""
+    if(len(pkmn1) > 2):
+        output +=(f"For pokemon %s "%entry1 + "of type(s)" + returnType(pkmn1[1][0]) + " and " + returnType(pkmn1[1][1]) + ":\n")
+    else:
+        output +=(f"For pokemon %s "%entry1 + "of type(s)" + returnType(pkmn1[1]) + ":\n")
+    for val in pkmn1_attack_profile:
+        curr_split = val.split(",")
+        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
+    pkmn2_attack_profile = generateTypeChart(pkmn2[0], "a")
+    if(len(pkmn2) > 2):
+        output +=(f"For pokemon %s "%entry2 + "of type(s)" + returnType(pkmn2[1][0]) + " and " + returnType(pkmn2[1][1]) + ":\n")
+    else:
+        output +=(f"For pokemon %s "%entry2 + "of type(s)" + returnType(pkmn2[1]) + ":\n")
+    for val in pkmn2_attack_profile:
+        curr_split = val.split(",")
+        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
+    pkmn3_attack_profile = generateTypeChart(pkmn3[0], "a")
+    if(len(pkmn3) > 2):
+        output +=(f"For pokemon %s "%entry3 + "of type(s)" + returnType(pkmn3[1][0]) + " and " + returnType(pkmn3[1][1]) + ":\n")
+    else:
+        output +=(f"For pokemon %s "%entry3 + "of type(s)" + returnType(pkmn3[1]) + ":\n")
+    for val in pkmn3_attack_profile:
+        curr_split = val.split(",")
+        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
+    pkmn4_attack_profile = generateTypeChart(pkmn4[0], "a")
+    if(len(pkmn4) > 2):
+        output +=(f"For pokemon %s "%entry4 + "of type(s)" + returnType(pkmn4[1][0]) + " and " + returnType(pkmn4[1][1]) + ":\n")
+    else:
+        output +=(f"For pokemon %s "%entry4 + "of type(s)" + returnType(pkmn4[1]) + ":\n")
+    for val in pkmn4_attack_profile:
+        curr_split = val.split(",")
+        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
+    pkmn5_attack_profile = generateTypeChart(pkmn5[0], "a")
+    if(len(pkmn5) > 2):
+        output +=(f"For pokemon %s "%entry5 + "of type(s)" + returnType(pkmn5[1][0]) + " and " + returnType(pkmn5[1][1]) + ":\n")
+    else:
+        output +=(f"For pokemon %s "%entry5 + "of type(s)" + returnType(pkmn5[1]) + ":\n")
+    for val in pkmn5_attack_profile:
+        curr_split = val.split(",")
+        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
+    pkmn6_attack_profile = generateTypeChart(pkmn6[0], "a")
+    if(len(pkmn6) > 2):
+        output +=(f"For pokemon %s "%entry6 + "of type(s)" + returnType(pkmn6[1][0]) + " and " + returnType(pkmn6[1][1]) + ":\n")
+    else:
+        output +=(f"For pokemon %s "%entry6 + "of type(s)" + returnType(pkmn6[1]) + ":\n")
+    for val in pkmn6_attack_profile:
+        curr_split = val.split(",")
+        output += "Attacks against " + returnType(curr_split[0]) + " are " + returnEffectiveness(curr_split[1]) + "effectiveness.\n"
+    text.insert("3.0", output)
     #pkmn1_defense_profile = generateTypeChart(pkmn1[1], "d")
     #TODO Insert the "Compare team type coverages" function calls
 
     #TODO Insert the findings into a text box like below
     #text.insert("1.0", "We got: " + str(entry1) + ", " + str(entry2) + ", " + str(entry3) + ", " + str(entry4) + ", " + str(entry5) + ", " + str(entry6))
     # call functions here...
-    text.insert("1.0", "Since you are curious, I did, in fact, work. You are just impatient.")
+    text.insert("1.0", "Your Results are as follows: \n")
     return None
 
 
@@ -314,7 +422,7 @@ entry6.pack()
 entryButton = tk.Button(window, text="Enter", command = submit)
 entryButton.pack()
 
-text = tk.Text(window)
+text = tk.Text(window, height=1000, width=1000)
 text.pack()
 
     
